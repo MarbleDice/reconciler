@@ -45,6 +45,7 @@ function confirmSolution(solutionId) {
 		$('*[data-right-ids~=' + id + ']').remove();
 	});
 
+	removeSolution(solutionId);
 	updateUniqueness();
 }
 

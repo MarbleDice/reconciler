@@ -279,8 +279,8 @@ function printModals($form, $solutions) {
 		}
 		printf("</table>\n");
 
-		printf("<span class=\"action\" onclick=\"javascript:confirmSolution(%d)\">Accept</span>\n", $solution->id);
-		printf("<span class=\"action\" onclick=\"javascript:removeSolution(%d)\">Delete</span>\n", $solution->id);
+		printf("<span class=\"action\" onclick=\"javascript:confirmSolution(%d)\">&#x2713; Accept</span>\n", $solution->id);
+		printf("<span class=\"action\" onclick=\"javascript:removeSolution(%d)\">&#x2716; Delete</span>\n", $solution->id);
 		printf("<span class=\"action\" onclick=\"javascript:closeModal(%d)\">Close</span>\n", $solution->id);
 		printf("</div>\n");
 		printf("</div>\n");
