@@ -219,9 +219,10 @@ function printTable($form, $lefts, $rights, $solutions, $isRight) {
 		// Table header
 		if ($n == 0) {
 			printf("<table class=\"data $cssClass\"><thead>\n");
-			printf("<tr><th colspan=\"2\">%s</th></tr>\n", $label);
+			printf("<tr><th colspan=\"3\">%s</th></tr>\n", $label);
 			printf("<th>Amount</th>");
 			printf("<th>Possible Matches</th>");
+			printf("<th></th>");
 			printf("</tr></thead>\n");
 			printf("<tbody>\n");
 		}
@@ -236,12 +237,22 @@ function printTable($form, $lefts, $rights, $solutions, $isRight) {
 
 		// Solutions
 		$filteredSolutions = array_values($filter($solutions, $lineItem));
-		printf("<td>\n");
+		printf("<td class=\"text\">\n");
 		foreach ($filteredSolutions as $s => $solution) {
 			if ($s == 0) printf("<ul>\n");
 			printf("<li class=\"%s\" data-solution-id=\"%d\" data-left-ids=\"%s\" data-right-ids=\"%s\">",
 					$solution->isUnique ? 'unique' : 'non-unique', $solution->id, $solution->getLeftIds(), $solution->getRightIds());
 			printf("<span onclick=\"javascript:openModal(%d)\">%s</span>\n", $solution->id, $solution);
+			printf("</li>\n");
+			if ($s == lastIndex($filteredSolutions)) printf("</ul>\n");
+		}
+		printf("</td>\n");
+
+		// Actions
+		printf("<td>\n");
+		foreach ($filteredSolutions as $s => $solution) {
+			if ($s == 0) printf("<ul>\n");
+			printf("<li data-solution-id=\"%d\">", $solution->id);
 			printf("<span class=\"action\" onclick=\"javascript:confirmSolution(%d)\">&#x2713;</span>\n", $solution->id);
 			printf("<span class=\"action\" onclick=\"javascript:removeSolution(%d)\">&#x2716;</span>\n", $solution->id);
 			printf("</li>\n");
@@ -254,8 +265,8 @@ function printTable($form, $lefts, $rights, $solutions, $isRight) {
 		// Table footer
 		if ($n == lastIndex($lineItems)) {
 			printf("</tbody><thead>\n");
-			printf("<tr><td>Total:</td><td>%s</td></tr>\n", moneyFormat($total));
-			printf("<tr><td>Difference:</td><td>%s</td></tr>\n", moneyFormat($total - $otherTotal));
+			printf("<tr><td colspan=\"2\">Total:</td><td>%s</td></tr>\n", moneyFormat($total));
+			printf("<tr><td colspan=\"2\">Difference:</td><td>%s</td></tr>\n", moneyFormat($total - $otherTotal));
 			printf("</thead></table>\n");
 		}
 	}
