@@ -334,12 +334,12 @@ Unique matches</span> only contain amounts that cannot be matched in any other c
 <form method="post">
 <table class="form">
 	<tr>
-		<td><span class="label"><?= $form['left-label'] ?> Data</span></td>
+		<td colspan="2"><span class="label"><?= $form['left-label'] ?> Data</span></td>
 		<td></td>
-		<td><span class="label"><?= $form['right-label'] ?> Data</span></td>
+		<td colspan="2"><span class="label"><?= $form['right-label'] ?> Data</span></td>
 	</tr>
 	<tr>
-		<td>
+		<td colspan="2">
 			<textarea name="left-input"><?= htmlentities($form['left-input']) ?></textarea>
 		</td>
 		<td>
@@ -348,22 +348,64 @@ Unique matches</span> only contain amounts that cannot be matched in any other c
 				<li><span class="action" onclick="javascript:clearTextarea();">&laquo;clear&raquo;</span></li>
 			</ul>
 		</td>
-		<td>
+		<td colspan="2">
 			<textarea name="right-input"><?= htmlentities($form['right-input']) ?></textarea>
 		</td>
 	</tr>
-	<tr><td colspan="3"></td></tr>
-	<tr><td colspan="3" class="label">Input mode</td></tr>
+	<tr><td colspan="5"></td></tr>
 	<tr>
-		<td colspan="3">
-			<div>
-				<input type="radio" name="left-mode" id="left-input-tsv" value="input-tsv" <?=$form['left-mode'] == 'input-tsv' ? 'checked' : ''?> />
-				<label for="left-input-tsv">Read only amounts in column #<input type="number" name="left-amount-col" size="2" value="<?=$form['left-amount-col']?>"> (TSV format)</input></label>
-			</div>
-			<div>
-				<input type="radio" name="left-mode" id="left-input-all" value="input-all" <?=$form['left-mode'] == 'input-all' ? 'checked' : ''?> />
-				<label for="left-input-all">Read all numbers</label>
-			</div>
+		<td colspan="3" class="label">Input mode</td>
+		<td colspan="2" class="label">Input mode</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="radio" name="left-mode" id="left-input-tsv" value="input-tsv" <?=$form['left-mode'] == 'input-tsv' ? 'checked' : ''?> />
+		</td>
+		<td>
+			<label for="left-input-tsv">Read data in TSV format</label>
+		</td>
+		<td></td>
+		<td>
+			<input type="radio" name="right-mode" id="right-input-tsv" value="input-tsv" <?=$form['right-mode'] == 'input-tsv' ? 'checked' : ''?> />
+		</td>
+		<td>
+			<label for="right-input-tsv">Read data in TSV format</label>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>Amount in column #<input type="number" name="left-amount-col" size="2" value="<?=$form['left-amount-col']?>"></input></td>
+		<td></td>
+		<td></td>
+		<td>Amount in column #<input type="number" name="right-amount-col" size="2" value="<?=$form['right-amount-col']?>"></input></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>Date in column #<input type="number" name="left-date-col" size="2" value="<?=$form['left-date-col']?>"></input></td>
+		<td></td>
+		<td></td>
+		<td>Date in column #<input type="number" name="right-date-col" size="2" value="<?=$form['right-date-col']?>"></input></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>Memo in column #<input type="number" name="left-memo-col" size="2" value="<?=$form['left-memo-col']?>"></input></td>
+		<td></td>
+		<td></td>
+		<td>Memo in column #<input type="number" name="right-memo-col" size="2" value="<?=$form['right-memo-col']?>"></input></td>
+	</tr>
+	<tr>
+		<td>
+			<input type="radio" name="left-mode" id="left-input-all" value="input-all" <?=$form['left-mode'] == 'input-all' ? 'checked' : ''?> />
+		</td>
+		<td>
+			<label for="left-input-all">Read all numbers</label>
+		</td>
+		<td></td>
+		<td>
+			<input type="radio" name="right-mode" id="right-input-all" value="input-all" <?=$form['right-mode'] == 'input-all' ? 'checked' : ''?> />
+		</td>
+		<td>
+			<label for="right-input-all">Read all numbers</label>
 		</td>
 	</tr>
 	<tr><td colspan="2"></td></tr>
