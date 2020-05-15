@@ -5,13 +5,10 @@
 		<meta charset="utf-8" />
 		<link rel="stylesheet" href="default.css" />
 		<script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
-		<script src="reconciler.js"></script>
+		<script src="reconciler.js?<?=filemtime('reconciler.js')?>"></script>
 	</head>
 	<body>
 <?php
-
-const MAX_LEFT = 3;
-const MAX_RIGHT = 3;
 
 class LineItem {
 	public $id = 1;
@@ -135,20 +132,20 @@ function sumLineItems($lineItems) {
 }
 
 // Uses a breadth-first search and prunes branches when a solution is found or not possible
-function checkLeft($chosenLefts, $chosenRights, $otherLefts, $otherRights, &$solutions) {
+function checkLeft($form, $chosenLefts, $chosenRights, $otherLefts, $otherRights, &$solutions) {
 	// Check all the rights for this combination of lefts
 	if (count($chosenLefts) > 0) {
-		checkRight($chosenLefts, $chosenRights, $otherLefts, $otherRights, $solutions);
+		checkRight($form, $chosenLefts, $chosenRights, $otherLefts, $otherRights, $solutions);
 	}
 
 	// Pick one more left and try those
-	for ($i = 0; $i < count($otherLefts) && count($chosenLefts) < MAX_LEFT; $i++) {
-		checkLeft(add($chosenLefts, $otherLefts[$i]), $chosenRights,
+	for ($i = 0; $i < count($otherLefts) && count($chosenLefts) < $form['left-max']; $i++) {
+		checkLeft($form, add($chosenLefts, $otherLefts[$i]), $chosenRights,
 				rightSlice($otherLefts, $i), $otherRights, $solutions);
 	}
 }
 
-function checkRight($chosenLefts, $chosenRights, $otherLefts, $otherRights, &$solutions) {
+function checkRight($form, $chosenLefts, $chosenRights, $otherLefts, $otherRights, &$solutions) {
 	// Check if this is a solution
 	$leftSum = sumLineItems($chosenLefts);
 	$rightSum = sumLineItems($chosenRights);
@@ -164,8 +161,8 @@ function checkRight($chosenLefts, $chosenRights, $otherLefts, $otherRights, &$so
 	}
 
 	// Pick one more right and try those
-	for ($i = 0; $i < count($otherRights) && count($chosenRights) < MAX_RIGHT; $i++) {
-		checkRight($chosenLefts, add($chosenRights, $otherRights[$i]),
+	for ($i = 0; $i < count($otherRights) && count($chosenRights) < $form['right-max']; $i++) {
+		checkRight($form, $chosenLefts, add($chosenRights, $otherRights[$i]),
 				$otherLefts, rightSlice($otherRights, $i), $solutions);
 	}
 }
@@ -179,7 +176,7 @@ function addSolution(&$solutions, $newSolution) {
 			return;
 		}
 	}
-	$solution->id += count($solutions);
+	$newSolution->id += count($solutions);
 	array_push($solutions, $newSolution);
 }
 
@@ -252,7 +249,7 @@ function printTable($form, $lefts, $rights, $solutions, $isRight) {
 		printf("<td>\n");
 		foreach ($filteredSolutions as $s => $solution) {
 			if ($s == 0) printf("<ul>\n");
-			printf("<li data-solution-id=\"%d\">", $solution->id);
+			printf("<li data-solution-id=\"%d\" data-left-ids=\"%s\" data-right-ids=\"%s\">", $solution->id, $solution->getLeftIds(), $solution->getRightIds());
 			printf("<span class=\"action\" onclick=\"javascript:confirmSolution(%d)\">&#x2713;</span>\n", $solution->id);
 			printf("<span class=\"action\" onclick=\"javascript:removeSolution(%d)\">&#x2716;</span>\n", $solution->id);
 			printf("</li>\n");
@@ -299,11 +296,14 @@ function printModals($form, $solutions) {
 }
 
 function extractInt($name, $defaultValue) {
-	return intval($_POST[$name]) > 0 ? intval($_POST[$name]) : $defaultValue;
+	return isset($_POST[$name]) && intval($_POST[$name]) > 0 ? intval($_POST[$name]) : $defaultValue;
 }
 
 // Extract input
 
+$form = array();
+
+$form['left-max'] = extractInt('left-max', 2);
 $form['left-label'] = "DSS";
 $form['left-input'] = $_POST['left-input'];
 $form['left-mode'] = $_POST['left-mode'] == "input-all" ? "input-all" : "input-tsv";
@@ -311,6 +311,7 @@ $form['left-amount-col'] = extractInt('left-amount-col', 3);
 $form['left-date-col'] = extractInt('left-date-col', 2);
 $form['left-memo-col'] = extractInt('left-memo-col', 6);
 
+$form['right-max'] = extractInt('right-max', 2);
 $form['right-label'] = "Bank Activity";
 $form['right-input'] = $_POST['right-input'];
 $form['right-mode'] = $_POST['right-mode'] == "input-all" ? "input-all" : "input-tsv";
@@ -325,7 +326,8 @@ $rights = extractNumbers($form['right-input'], $form['right-mode'],
 
 // Find all solutions
 $solutions = array();
-checkLeft(array(), array(), $lefts, $rights, $solutions);
+set_time_limit(0);
+checkLeft($form, array(), array(), $lefts, $rights, $solutions);
 checkUniqueness($solutions);
 
 ?>
@@ -365,6 +367,16 @@ Unique matches</span> only contain amounts that cannot be matched in any other c
 	</tr>
 	<tr><td colspan="5"></td></tr>
 	<tr>
+		<td colspan="3">
+			<span class="label">Max lines combined</span>
+			<input type="number" name="left-max" size="2" value="<?=$form['left-max']?>"></input>
+		</td>
+		<td colspan="2">
+			<span class="label">Max lines combined</span>
+			<input type="number" name="right-max" size="2" value="<?=$form['right-max']?>"></input>
+		</td>
+	</tr>
+	<tr>
 		<td colspan="3" class="label">Input mode</td>
 		<td colspan="2" class="label">Input mode</td>
 	</tr>
@@ -373,36 +385,30 @@ Unique matches</span> only contain amounts that cannot be matched in any other c
 			<input type="radio" name="left-mode" id="left-input-tsv" value="input-tsv" <?=$form['left-mode'] == 'input-tsv' ? 'checked' : ''?> />
 		</td>
 		<td>
-			<label for="left-input-tsv">Read data in TSV format</label>
+			<label for="left-input-tsv">Read data in TSV format with columns:</label>
 		</td>
 		<td></td>
 		<td>
 			<input type="radio" name="right-mode" id="right-input-tsv" value="input-tsv" <?=$form['right-mode'] == 'input-tsv' ? 'checked' : ''?> />
 		</td>
 		<td>
-			<label for="right-input-tsv">Read data in TSV format</label>
+			<label for="right-input-tsv">Read data in TSV format with columns:</label>
 		</td>
 	</tr>
 	<tr>
 		<td></td>
-		<td>Amount in column #<input type="number" name="left-amount-col" size="2" value="<?=$form['left-amount-col']?>"></input></td>
+		<td>
+			Amount in <input type="number" name="left-amount-col" size="2" value="<?=$form['left-amount-col']?>"></input>
+			Date in <input type="number" name="left-date-col" size="2" value="<?=$form['left-date-col']?>"></input>
+			Memo in <input type="number" name="left-memo-col" size="2" value="<?=$form['left-memo-col']?>"></input>
+		</td>
 		<td></td>
 		<td></td>
-		<td>Amount in column #<input type="number" name="right-amount-col" size="2" value="<?=$form['right-amount-col']?>"></input></td>
-	</tr>
-	<tr>
-		<td></td>
-		<td>Date in column #<input type="number" name="left-date-col" size="2" value="<?=$form['left-date-col']?>"></input></td>
-		<td></td>
-		<td></td>
-		<td>Date in column #<input type="number" name="right-date-col" size="2" value="<?=$form['right-date-col']?>"></input></td>
-	</tr>
-	<tr>
-		<td></td>
-		<td>Memo in column #<input type="number" name="left-memo-col" size="2" value="<?=$form['left-memo-col']?>"></input></td>
-		<td></td>
-		<td></td>
-		<td>Memo in column #<input type="number" name="right-memo-col" size="2" value="<?=$form['right-memo-col']?>"></input></td>
+		<td>
+			Amount in <input type="number" name="right-amount-col" size="2" value="<?=$form['right-amount-col']?>"></input>
+			Date in <input type="number" name="right-date-col" size="2" value="<?=$form['right-date-col']?>"></input>
+			Memo in <input type="number" name="right-memo-col" size="2" value="<?=$form['right-memo-col']?>"></input>
+		</td>
 	</tr>
 	<tr>
 		<td>

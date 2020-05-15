@@ -46,15 +46,18 @@ function confirmSolution(solutionId) {
 	});
 
 	removeSolution(solutionId);
-	updateUniqueness();
 }
 
 function updateUniqueness() {
 	$('li.non-unique').filter(function (index) {
 		var leftIds = $(this).attr('data-left-ids').split(' ');
 		var rightIds = $(this).attr('data-right-ids').split(' ');
-		var total = leftIds.length + rightIds.length;
-		console.log("Checking " + leftIds + " " + rightIds + " total " + total);
+		// For uniqueness, total elements should be twice the number of combined IDs
+		// Each left/right has a solution and a control
+		var total = 2 * (leftIds.length + rightIds.length);
+
+		// console.log("Checking " + leftIds + " " + rightIds + " total " + total);
+
 		for (let i in leftIds) {
 			if ($('*[data-left-ids~=' + leftIds[i] + ']').length != total) {
 				return false;
