@@ -3,7 +3,7 @@
 	<head>
 		<title>Reconciler</title>
 		<meta charset="utf-8" />
-		<link rel="stylesheet" href="default.css" />
+		<link rel="stylesheet" href="default.css?<?=filemtime('default.css')?>" />
 		<script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
 		<script src="reconciler.js?<?=filemtime('reconciler.js')?>"></script>
 	</head>
@@ -305,16 +305,16 @@ $form = array();
 
 $form['left-max'] = extractInt('left-max', 2);
 $form['left-label'] = "DSS";
-$form['left-input'] = $_POST['left-input'];
-$form['left-mode'] = $_POST['left-mode'] == "input-all" ? "input-all" : "input-tsv";
+$form['left-input'] = $_POST['left-input'] ?? '';
+$form['left-mode'] = ($_POST['left-mode'] ?? '') == "input-all" ? "input-all" : "input-tsv";
 $form['left-amount-col'] = extractInt('left-amount-col', 3);
 $form['left-date-col'] = extractInt('left-date-col', 2);
 $form['left-memo-col'] = extractInt('left-memo-col', 6);
 
 $form['right-max'] = extractInt('right-max', 2);
 $form['right-label'] = "Bank Activity";
-$form['right-input'] = $_POST['right-input'];
-$form['right-mode'] = $_POST['right-mode'] == "input-all" ? "input-all" : "input-tsv";
+$form['right-input'] = $_POST['right-input'] ?? '';
+$form['right-mode'] = ($_POST['right-mode'] ?? '') == "input-all" ? "input-all" : "input-tsv";
 $form['right-amount-col'] = extractInt('right-amount-col', 3);
 $form['right-date-col'] = extractInt('right-date-col', 2);
 $form['right-memo-col'] = extractInt('right-memo-col', 6);
